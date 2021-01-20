@@ -18,13 +18,14 @@ namespace OpenTabletDriver.UX
 {
     using static App;
 
-    public partial class MainForm : DesktopForm
+    public partial class MainForm : Form
     {
         public MainForm()
             : base()
         {
+            InitializePlatform();
+
             Title = "OpenTabletDriver";
-            ClientSize = new Size(DEFAULT_CLIENT_WIDTH, DEFAULT_CLIENT_HEIGHT);
             Content = ConstructPlaceholderControl();
             Menu = ConstructMenu();
 
@@ -43,6 +44,8 @@ namespace OpenTabletDriver.UX
             InitializeAsync();
         }
 
+        private const int DEFAULT_CLIENT_WIDTH = 960;
+        private const int DEFAULT_CLIENT_HEIGHT = 760;
         private OutputModeEditor outputModeEditor;
         private BindingEditor bindingEditor;
         private PluginSettingStoreCollectionEditor<IFilter> filterEditor;
@@ -58,10 +61,8 @@ namespace OpenTabletDriver.UX
             outputModeEditor.Refresh();
         }
 
-        protected override void OnInitializePlatform(EventArgs e)
+        protected void InitializePlatform()
         {
-            base.OnInitializePlatform(e);
-
             switch (SystemInterop.CurrentPlatform)
             {
                 case PluginPlatform.MacOS:
@@ -72,16 +73,25 @@ namespace OpenTabletDriver.UX
             bool enableDaemonWatchdog = SystemInterop.CurrentPlatform switch
             {
                 PluginPlatform.Windows => true,
-                PluginPlatform.MacOS   => true,
-                _                      => false,
+                PluginPlatform.MacOS => true,
+                _ => false,
             };
 
-            if (SystemInterop.CurrentPlatform == PluginPlatform.MacOS)
+            var bounds = Screen.FromPoint(Mouse.Position).Bounds;
+
+            if (this.WindowState == WindowState.Normal)
             {
-                var bounds = Screen.PrimaryScreen.Bounds;
-                var minWidth = Math.Min(970, bounds.Width * 0.9);
-                var minHeight = Math.Min(770, bounds.Height * 0.9);
-                this.ClientSize = new Size((int)minWidth, (int)minHeight);
+                var minWidth = Math.Min(DEFAULT_CLIENT_WIDTH, bounds.Width * 0.95);
+                var minHeight = Math.Min(DEFAULT_CLIENT_HEIGHT, bounds.Height * 0.95);
+
+                this.Size = new Size((int)minWidth, (int)minHeight);
+
+                if (SystemInterop.CurrentPlatform == PluginPlatform.Windows)
+                {
+                    var x = Screen.WorkingArea.Center.X - (minWidth / 2);
+                    var y = Screen.WorkingArea.Center.Y - (minHeight / 2);
+                    this.Location = new Point((int)x, (int)y);
+                }
             }
 
             if (App.EnableTrayIcon)

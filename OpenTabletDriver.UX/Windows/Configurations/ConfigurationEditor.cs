@@ -16,7 +16,7 @@ using OpenTabletDriver.UX.Windows.Configurations.Controls;
 
 namespace OpenTabletDriver.UX.Windows.Configurations
 {
-    public class ConfigurationEditor : DesktopForm
+    public class ConfigurationEditor : ChildForm
     {
         public ConfigurationEditor()
             : base()
@@ -204,7 +204,7 @@ namespace OpenTabletDriver.UX.Windows.Configurations
             public async Task GenerateConfiguration()
             {
                 var dialog = new DeviceListDialog();
-                if (await dialog.ShowModalAsync() is HidDevice device)
+                if (await dialog.ShowModalAsync(this) is HidDevice device)
                 {
                     try
                     {

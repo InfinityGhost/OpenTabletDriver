@@ -19,7 +19,7 @@ using StreamJsonRpc.Protocol;
 
 namespace OpenTabletDriver.UX.Windows
 {
-    public class PluginManagerWindow : DesktopForm
+    public class PluginManagerWindow : ChildForm
     {
         public PluginManagerWindow()
             : base()
@@ -92,7 +92,7 @@ namespace OpenTabletDriver.UX.Windows
         protected async Task SwitchRepositorySource()
         {
             var dialog = new RepositoryDialog("Switch Repository Source");
-            if (await dialog.ShowModalAsync() is PluginMetadataCollection repository)
+            if (await dialog.ShowModalAsync(this) is PluginMetadataCollection repository)
                 await Refresh(repository);
         }
 

@@ -5,9 +5,10 @@ using OpenTabletDriver.UX.Controls.Generic;
 
 namespace OpenTabletDriver.UX.Windows
 {
-    public class AreaConverterDialog : Dialog
+    public class AreaConverterDialog : ChildDialog
     {
         public AreaConverterDialog()
+            : base(Application.Instance.MainForm)
         {
             base.Title = "Area Converter";
 

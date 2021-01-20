@@ -6,7 +6,7 @@ using OpenTabletDriver.UX.Controls.Generic;
 
 namespace OpenTabletDriver.UX.Windows
 {
-    public class DeviceStringReader : DesktopForm
+    public class DeviceStringReader : ChildForm
     {
         public DeviceStringReader()
             : base()
