@@ -95,8 +95,8 @@ namespace OpenTabletDriver.UX
             bool enableDaemonWatchdog = SystemInterop.CurrentPlatform switch
             {
                 PluginPlatform.Windows => true,
-                PluginPlatform.MacOS => true,
-                _ => false,
+                PluginPlatform.MacOS   => true,
+                _                      => false,
             };
 
             if (App.EnableTrayIcon)
