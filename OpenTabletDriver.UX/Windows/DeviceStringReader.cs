@@ -6,10 +6,10 @@ using OpenTabletDriver.UX.Controls.Generic;
 
 namespace OpenTabletDriver.UX.Windows
 {
-    public class DeviceStringReader : ChildForm
+    public class DeviceStringReader : DesktopForm
     {
         public DeviceStringReader()
-            : base()
+            : base(Application.Instance.MainForm)
         {
             this.Title = "Device String Reader";
             this.Icon = App.Logo.WithSize(App.Logo.Size);

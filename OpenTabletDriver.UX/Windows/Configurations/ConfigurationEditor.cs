@@ -16,10 +16,10 @@ using OpenTabletDriver.UX.Windows.Configurations.Controls;
 
 namespace OpenTabletDriver.UX.Windows.Configurations
 {
-    public class ConfigurationEditor : ChildForm
+    public class ConfigurationEditor : DesktopForm
     {
         public ConfigurationEditor()
-            : base()
+            : base(Application.Instance.MainForm)
         {
             base.Title = "Configuration Editor";
             base.ClientSize = new Size(910, 680);

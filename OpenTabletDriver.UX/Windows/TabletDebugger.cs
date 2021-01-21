@@ -8,10 +8,10 @@ using OpenTabletDriver.UX.Controls.Generic;
 
 namespace OpenTabletDriver.UX.Windows
 {
-    public class TabletDebugger : ChildForm
+    public class TabletDebugger : DesktopForm
     {
         public TabletDebugger()
-            : base()
+            : base(Application.Instance.MainForm)
         {
             Title = "Tablet Debugger";
             ClientSize = new Size(640, 480);

@@ -18,11 +18,13 @@ namespace OpenTabletDriver.UX
 {
     using static App;
 
-    public partial class MainForm : Form
+    public partial class MainForm : DesktopForm
     {
         public MainForm()
             : base()
         {
+            // Call InitializeForm on ctor since DesktopForm.Show() won't be called on binary launch
+            InitializeForm();
             InitializePlatform();
 
             Title = "OpenTabletDriver";
@@ -61,6 +63,26 @@ namespace OpenTabletDriver.UX
             outputModeEditor.Refresh();
         }
 
+        protected override void InitializeForm()
+        {
+            var bounds = Screen.FromPoint(Mouse.Position).Bounds;
+
+            if (this.WindowState != WindowState.Maximized)
+            {
+                var minWidth = Math.Min(DEFAULT_CLIENT_WIDTH, bounds.Width * 0.95);
+                var minHeight = Math.Min(DEFAULT_CLIENT_HEIGHT, bounds.Height * 0.95);
+
+                this.Size = new Size((int)minWidth, (int)minHeight);
+
+                if (SystemInterop.CurrentPlatform == PluginPlatform.Windows)
+                {
+                    var x = Screen.WorkingArea.Center.X - (minWidth / 2);
+                    var y = Screen.WorkingArea.Center.Y - (minHeight / 2);
+                    this.Location = new Point((int)x, (int)y);
+                }
+            }
+        }
+
         protected void InitializePlatform()
         {
             switch (SystemInterop.CurrentPlatform)
@@ -76,23 +98,6 @@ namespace OpenTabletDriver.UX
                 PluginPlatform.MacOS => true,
                 _ => false,
             };
-
-            var bounds = Screen.FromPoint(Mouse.Position).Bounds;
-
-            if (this.WindowState == WindowState.Normal)
-            {
-                var minWidth = Math.Min(DEFAULT_CLIENT_WIDTH, bounds.Width * 0.95);
-                var minHeight = Math.Min(DEFAULT_CLIENT_HEIGHT, bounds.Height * 0.95);
-
-                this.Size = new Size((int)minWidth, (int)minHeight);
-
-                if (SystemInterop.CurrentPlatform == PluginPlatform.Windows)
-                {
-                    var x = Screen.WorkingArea.Center.X - (minWidth / 2);
-                    var y = Screen.WorkingArea.Center.Y - (minHeight / 2);
-                    this.Location = new Point((int)x, (int)y);
-                }
-            }
 
             if (App.EnableTrayIcon)
             {
