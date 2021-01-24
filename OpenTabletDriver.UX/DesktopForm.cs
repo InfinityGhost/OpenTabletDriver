@@ -22,11 +22,14 @@ namespace OpenTabletDriver.UX
 
         protected virtual void InitializeForm()
         {
-            var x = Owner.Location.X + (Owner.ClientSize.Width / 2);
-            var y = Owner.Location.Y + (Owner.ClientSize.Height / 2);
-            var center = new PointF(x, y);
+            if (!Platform.IsGtk)
+            {
+                var x = Owner.Location.X + (Owner.ClientSize.Width / 2);
+                var y = Owner.Location.Y + (Owner.ClientSize.Height / 2);
+                var center = new PointF(x, y);
 
-            Location = new Point((int)(center.X - (ClientSize.Width / 2)), (int)(center.Y - (ClientSize.Height / 2)));
+                Location = new Point((int)(center.X - (ClientSize.Width / 2)), (int)(center.Y - (ClientSize.Height / 2)));
+            }
         }
 
         public new void Show()
