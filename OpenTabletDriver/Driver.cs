@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using HidSharp;
 using OpenTabletDriver.Devices;
@@ -11,7 +10,6 @@ using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
 using OpenTabletDriver.Plugin.Tablet.Interpolator;
-using OpenTabletDriver.Reflection;
 using OpenTabletDriver.Tablet;
 
 namespace OpenTabletDriver
@@ -35,10 +33,24 @@ namespace OpenTabletDriver
         public event EventHandler<DevicesChangedEventArgs> DevicesChanged;
         public event EventHandler<TabletState> TabletChanged;
 
+        private static readonly Dictionary<string, Func<IReportParser<IDeviceReport>>> reportParserDict = new Dictionary<string, Func<IReportParser<IDeviceReport>>>
+        {
+            { typeof(TabletReportParser).FullName, () => new TabletReportParser() },
+            { typeof(AuxReportParser).FullName, () => new AuxReportParser() },
+            { typeof(TiltTabletReportParser).FullName, () => new TiltTabletReportParser() },
+            { typeof(Vendors.SkipByteTabletReportParser).FullName, () => new Vendors.SkipByteTabletReportParser() },
+            { typeof(Vendors.Gaomon.GaomonReportParser).FullName, () => new Vendors.Gaomon.GaomonReportParser() },
+            { typeof(Vendors.Huion.GianoReportParser).FullName, () => new Vendors.Huion.GianoReportParser() },
+            { typeof(Vendors.Wacom.BambooReportParser).FullName, () => new Vendors.Wacom.BambooReportParser() },
+            { typeof(Vendors.Wacom.IntuosV2ReportParser).FullName, () => new Vendors.Wacom.IntuosV2ReportParser() },
+            { typeof(Vendors.Wacom.IntuosV3ReportParser).FullName, () => new Vendors.Wacom.IntuosV3ReportParser() },
+            { typeof(Vendors.Wacom.WacomDriverIntuosV2ReportParser).FullName, () => new Vendors.Wacom.WacomDriverIntuosV2ReportParser() },
+            { typeof(Vendors.Wacom.WacomDriverIntuosV3ReportParser).FullName, () => new Vendors.Wacom.WacomDriverIntuosV3ReportParser() },
+            { typeof(Vendors.XP_Pen.XP_PenReportParser).FullName, () => new Vendors.XP_Pen.XP_PenReportParser() }
+        };
+
         protected IEnumerable<HidDevice> CurrentDevices { set; get; } = DeviceList.Local.GetHidDevices();
 
-        protected virtual PluginManager PluginManager { get; } = new PluginManager();
-        
         public bool EnableInput { set; get; }
         public bool InterpolatorActive => Interpolators.Any();
 
@@ -155,7 +167,14 @@ namespace OpenTabletDriver
         {
             TabletReader?.Dispose();
 
-            Log.Debug("Detect", $"Using device '{tabletDevice.GetFriendlyName()}'.");
+            string friendlyName = "Unnamed Device";
+            try
+            {
+                friendlyName = tabletDevice.GetFriendlyName();
+            }
+            catch { }
+
+            Log.Debug("Detect", $"Using device '{friendlyName}'.");
             Log.Debug("Detect", $"Using report parser type '{reportParser.GetType().FullName}'.");
             Log.Debug("Detect", $"Device path: {tabletDevice.DevicePath}");
 
@@ -205,7 +224,14 @@ namespace OpenTabletDriver
         {
             AuxReader?.Dispose();
 
-            Log.Debug("Detect", $"Using auxiliary device '{auxDevice.GetFriendlyName()}'.");
+            string friendlyName = "Unnamed Device";
+            try
+            {
+                friendlyName = auxDevice.GetFriendlyName();
+            }
+            catch { }
+
+            Log.Debug("Detect", $"Using device '{friendlyName}'.");
             Log.Debug("Detect", $"Using auxiliary report parser type '{reportParser.GetType().Name}'.");
             Log.Debug("Detect", $"Device path: {auxDevice.DevicePath}");
 
@@ -315,8 +341,7 @@ namespace OpenTabletDriver
 
         protected IReportParser<IDeviceReport> GetReportParser(string parserName) 
         {
-            var parserRef = PluginManager.GetPluginReference(parserName);
-            return parserRef.Construct<IReportParser<IDeviceReport>>();
+            return reportParserDict[parserName].Invoke();
         }
 
         public void Dispose()

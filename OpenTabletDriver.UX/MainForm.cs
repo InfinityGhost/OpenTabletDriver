@@ -13,12 +13,13 @@ using OpenTabletDriver.UX.Controls;
 using OpenTabletDriver.UX.Windows;
 using OpenTabletDriver.UX.Windows.Configurations;
 using OpenTabletDriver.UX.Windows.Greeter;
+using OpenTabletDriver.UX.Windows.Tablet;
 
 namespace OpenTabletDriver.UX
 {
     using static App;
 
-    public partial class MainForm : DesktopForm
+    public class MainForm : DesktopForm
     {
         public MainForm()
             : base()
@@ -104,16 +105,21 @@ namespace OpenTabletDriver.UX
             {
                 var trayIcon = new TrayIcon(this);
                 if (WindowState == WindowState.Minimized)
+                {
+                    this.Visible = false;
                     this.ShowInTaskbar = false;
+                }
                 this.WindowStateChanged += (sender, e) =>
                 {
                     switch (this.WindowState)
                     {
                         case WindowState.Normal:
                         case WindowState.Maximized:
+                            this.Visible = true;
                             this.ShowInTaskbar = true;
                             break;
                         case WindowState.Minimized:
+                            this.Visible = false;
                             this.ShowInTaskbar = false;
                             break;
                     }
@@ -408,8 +414,11 @@ namespace OpenTabletDriver.UX
             if (!settingsFile.Exists && this.WindowState != WindowState.Minimized)
                 await ShowFirstStartupGreeter();
 
-            Driver.Instance.TabletChanged += (sender, tablet) => outputModeEditor.SetTabletSize(tablet);
-            Driver.Instance.TabletChanged += (sender, tablet) => Application.Instance.AsyncInvoke(() => UpdateTitle(tablet));
+            Driver.Instance.TabletChanged += (sender, tablet) => Application.Instance.AsyncInvoke(() =>
+            {
+                outputModeEditor.SetTabletSize(tablet);
+                UpdateTitle(tablet);
+            });
         }
 
         public void UpdateTitle(TabletState tablet)
@@ -421,27 +430,7 @@ namespace OpenTabletDriver.UX
         {
             appInfo ??= await Driver.Instance.GetApplicationInfo();
             settingsFile = new FileInfo(appInfo.SettingsFile);
-            if (await Driver.Instance.GetSettings() is Settings settings)
-            {
-                await Application.Instance.InvokeAsync(() => Settings = settings);
-            }
-            else if (settingsFile.Exists)
-            {
-                try
-                {
-                    await Application.Instance.InvokeAsync(() => Settings = Settings.Deserialize(settingsFile));
-                    await Driver.Instance.SetSettings(Settings);
-                }
-                catch
-                {
-                    MessageBox.Show("Failed to load your current settings. They are either out of date or corrupted.", MessageBoxType.Error);
-                    await ResetSettings();
-                }
-            }
-            else
-            {
-                await ResetSettings();
-            }
+            Settings = await Driver.Instance.GetSettings();
         }
 
         private async Task ResetSettings(bool force = true)
