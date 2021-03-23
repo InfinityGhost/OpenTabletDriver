@@ -15,9 +15,14 @@ namespace OpenTabletDriver.Environ.Drivers
             "Wacom"
         };
 
+        protected override DriverInfo GetWinDriverInfo()
+        {
+            return base.GetWinDriverInfo() with { IsBlockingDriver = false };
+        }
+
         protected override DriverInfo GetLinuxDriverInfo()
         {
-            return base.GetLinuxDriverInfo() with { IsBlockingDriver = true };
+            return base.GetLinuxDriverInfo() with { IsBlockingDriver = false };
         }
     }
 }
