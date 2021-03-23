@@ -15,6 +15,7 @@ using OpenTabletDriver.Desktop.Output;
 using OpenTabletDriver.Desktop.Reflection;
 using OpenTabletDriver.Desktop.Reflection.Metadata;
 using OpenTabletDriver.Desktop.RPC;
+using OpenTabletDriver.Environ;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Logging;
 using OpenTabletDriver.Plugin.Output;
@@ -49,6 +50,15 @@ namespace OpenTabletDriver.Daemon
                 if (await GetTablet() == null && args.Additions.Count() > 0)
                     await DetectTablets();
             };
+
+            foreach (var driverInfo in DriverInfo.GetDriverInfos())
+            {
+                Log.Write("Detect", $"Another tablet driver found: {driverInfo.Name}", LogLevel.Warning);
+                if (driverInfo.IsBlockingDriver)
+                    Log.Write("Detect", $"Detection for {driverInfo.Name} tablets might be impaired", LogLevel.Warning);
+                else if (driverInfo.IsSendingInput)
+                    Log.Write("Detect", $"Detected input coming from {driverInfo.Name} driver", LogLevel.Error);
+            }
 
             LoadUserSettings();
         }
