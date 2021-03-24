@@ -70,20 +70,31 @@ namespace OpenTabletDriver.Environ.Drivers
 
         internal static void Refresh()
         {
-            var pnputilProc = new Process
+            switch (SystemInterop.CurrentPlatform)
             {
-                StartInfo = new ProcessStartInfo
+                case PluginPlatform.Windows:
                 {
-                    FileName = "pnputil.exe",
-                    Arguments = "-e",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true
-                }
-            };
+                    var pnputilProc = new Process
+                    {
+                        StartInfo = new ProcessStartInfo
+                        {
+                            FileName = "pnputil.exe",
+                            Arguments = "-e",
+                            UseShellExecute = false,
+                            RedirectStandardOutput = true
+                        }
+                    };
 
-            pnputilProc.Start();
-            PnpUtil = pnputilProc.StandardOutput.ReadToEnd();
-            LinuxModules = File.ReadAllText("/proc/modules");
+                    pnputilProc.Start();
+                    PnpUtil = pnputilProc.StandardOutput.ReadToEnd();
+                    break;
+                }
+                case PluginPlatform.Linux:
+                {
+                    LinuxModules = File.ReadAllText("/proc/modules");
+                    break;
+                }
+            }
         }
     }
 }
