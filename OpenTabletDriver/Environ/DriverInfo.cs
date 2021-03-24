@@ -48,6 +48,7 @@ namespace OpenTabletDriver.Environ
                 new HuionDriver(),
                 new XPPenDriver(),
                 new VeikkDriver(),
+                new Drivers.OpenTabletDriver(),
                 new TabletDriver()
             };
 
