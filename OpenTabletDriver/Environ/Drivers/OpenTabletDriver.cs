@@ -4,7 +4,8 @@ namespace OpenTabletDriver.Environ.Drivers
     {
         public DriverInfo GetDriverInfo()
         {
-            if (Instance.Exists("OpenTabletDriver.Daemon") && !Instance.IsOwner)
+            var daemonInstanceName = "OpenTabletDriver.Daemon";
+            if (Instance.Exists(daemonInstanceName) && !Instance.IsOwnerOf(daemonInstanceName))
             {
                 return new DriverInfo
                 {

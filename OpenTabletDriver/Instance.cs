@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace OpenTabletDriver
@@ -7,18 +9,15 @@ namespace OpenTabletDriver
     {
         public Instance(string name)
         {
-            this.mutex = new Mutex(true, $"{prefix}{name}", out bool createdNew);
+            this.mutex = new Mutex(true, $"{MUTEX_PREFIX}{name}", out bool createdNew);
             AlreadyExists = !createdNew;
-            if (!isOwnerSet)
-            {
-                IsOwner = createdNew;
-                isOwnerSet = true;
-            }
+            if (createdNew)
+                ownedInstances.Add(this);
         }
 
         public static bool Exists(string name)
         {
-            var result = Mutex.TryOpenExisting($"{prefix}{name}", out var mutex);
+            var result = Mutex.TryOpenExisting($"{MUTEX_PREFIX}{name}", out var mutex);
             using (mutex)
             {
                 mutex?.Close();
@@ -26,10 +25,18 @@ namespace OpenTabletDriver
             }
         }
 
-        private const string prefix = @"Global\";
+        public static bool IsOwnerOf(string name)
+        {
+            return ownedInstances.Any(i => i.Name == name);
+        }
+
+
+        private const string MUTEX_PREFIX = @"Global\";
+        private readonly static List<Instance> ownedInstances = new List<Instance>();
+
         private Mutex mutex;
-        private static bool isOwnerSet;
-        public static bool IsOwner { protected set; get; }
+
+        public string Name { get; }
         public bool AlreadyExists { protected set; get; }
 
         public void Dispose()
