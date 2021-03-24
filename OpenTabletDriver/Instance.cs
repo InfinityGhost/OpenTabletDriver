@@ -9,6 +9,11 @@ namespace OpenTabletDriver
         {
             this.mutex = new Mutex(true, $"{prefix}{name}", out bool createdNew);
             AlreadyExists = !createdNew;
+            if (!isOwnerSet)
+            {
+                IsOwner = createdNew;
+                isOwnerSet = true;
+            }
         }
 
         public static bool Exists(string name)
@@ -23,6 +28,8 @@ namespace OpenTabletDriver
 
         private const string prefix = @"Global\";
         private Mutex mutex;
+        private static bool isOwnerSet;
+        public static bool IsOwner { protected set; get; }
         public bool AlreadyExists { protected set; get; }
 
         public void Dispose()
