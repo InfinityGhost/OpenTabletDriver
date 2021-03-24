@@ -20,13 +20,19 @@ namespace OpenTabletDriver.Environ.Drivers
         protected override DriverInfo GetWinDriverInfo()
         {
             var info = base.GetWinDriverInfo();
-            return info != null ? info with { IsBlockingDriver = false } : null;
+            if (info != null)
+                info.IsBlockingDriver = false;
+
+            return info;
         }
 
         protected override DriverInfo GetLinuxDriverInfo()
         {
             var info = base.GetLinuxDriverInfo();
-            return info != null ? info with { IsBlockingDriver = false } : null;
+            if (info != null)
+                info.IsBlockingDriver = false;
+
+            return info;
         }
     }
 }

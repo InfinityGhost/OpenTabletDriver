@@ -11,12 +11,12 @@ namespace OpenTabletDriver.Environ
     /// <remarks>
     /// See <see cref="GetDriverInfos"/> to get all the currently active tablet drivers.
     /// </remarks>
-    public record DriverInfo
+    public class DriverInfo
     {
         /// <summary>
         /// The human-friendly name of the driver.
         /// </summary>
-        public string Name { get; init; }
+        public string Name { get; internal set; }
 
         /// <summary>
         /// Running processes that might be associated with the driver.
@@ -24,17 +24,17 @@ namespace OpenTabletDriver.Environ
         /// <remarks>
         /// This is set to null when there is no associated process.
         /// </remarks>
-        public Process[] Processes { get; init; }
+        public Process[] Processes { get; internal set; }
 
         /// <summary>
         /// Provides hints of whether this driver might interfere with OTD's detection mechanism, or prevent OTD from accessing the tablet.
         /// </summary>
-        public bool IsBlockingDriver { get; init; }
+        public bool IsBlockingDriver { get; internal set; }
 
         /// <summary>
         /// Returns true if this driver sends input to the operating system.
         /// </summary>
-        public bool IsSendingInput { get; init; }
+        public bool IsSendingInput { get; internal set; }
 
         /// <summary>
         /// Retrieves all the currently active tablet drivers.
