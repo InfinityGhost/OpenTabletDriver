@@ -4,9 +4,11 @@ namespace OpenTabletDriver.Environ.Drivers
     {
         protected override string FriendlyName => "Veikk";
 
-        protected override (string, string) LinuxModuleName => ("UC Logic", "hid_uclogic");
+        protected override string LinuxFriendlyName => "UC Logic";
 
-        protected override string[] WinProcessNames => new string[]
+        protected override string LinuxModuleName => "hid_uclogic";
+
+        protected override string[] WinProcessNames { get; } = new string[]
         {
             "TabletDriverCenter",
             "TabletDriverSetting"

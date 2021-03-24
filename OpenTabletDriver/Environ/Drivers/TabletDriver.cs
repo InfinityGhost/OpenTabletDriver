@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Linq;
 using OpenTabletDriver.Interop;
 using OpenTabletDriver.Plugin;
@@ -7,7 +6,7 @@ namespace OpenTabletDriver.Environ.Drivers
 {
     internal class TabletDriver : IDriverInfoProvider
     {
-        private string[] ProcessNames = new string[]
+        private readonly string[] ProcessNames = new string[]
         {
             "TabletDriverGUI",
             "TabletDriverService"

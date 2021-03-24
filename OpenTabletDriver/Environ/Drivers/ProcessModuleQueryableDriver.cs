@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using OpenTabletDriver.Interop;
@@ -10,11 +11,13 @@ namespace OpenTabletDriver.Environ.Drivers
     internal abstract class ProcessModuleQueryableDriver : IDriverInfoProvider
     {
         protected abstract string FriendlyName { get; }
-        protected abstract (string, string) LinuxModuleName { get; }
+        protected abstract string LinuxFriendlyName { get; }
+        protected abstract string LinuxModuleName { get; }
         protected abstract string[] WinProcessNames { get; }
         protected abstract string[] Heuristics { get; }
 
         private static string PnpUtil;
+        private static string LinuxModules;
 
         public DriverInfo GetDriverInfo()
         {
@@ -50,22 +53,11 @@ namespace OpenTabletDriver.Environ.Drivers
 
         protected virtual DriverInfo GetLinuxDriverInfo()
         {
-            var lsmodProc = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "lsmod",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = true,
-                }
-            };
-            lsmodProc.Start();
-
-            if (lsmodProc.WaitForExit(1000) && lsmodProc.StandardOutput.ReadToEnd().Contains(LinuxModuleName.Item2))
+            if (Regex.IsMatch(LinuxModules, LinuxModuleName))
             {
                 return new DriverInfo
                 {
-                    Name = LinuxModuleName.Item1,
+                    Name = LinuxFriendlyName,
                     IsBlockingDriver = true,
                     IsSendingInput = true
                 };
@@ -82,7 +74,7 @@ namespace OpenTabletDriver.Environ.Drivers
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "C:\\Windows\\System32\\pnputil.exe",
+                    FileName = "pnputil.exe",
                     Arguments = "-e",
                     UseShellExecute = false,
                     RedirectStandardOutput = true
@@ -91,6 +83,7 @@ namespace OpenTabletDriver.Environ.Drivers
 
             pnputilProc.Start();
             PnpUtil = pnputilProc.StandardOutput.ReadToEnd();
+            LinuxModules = File.ReadAllText("/proc/modules");
         }
     }
 }

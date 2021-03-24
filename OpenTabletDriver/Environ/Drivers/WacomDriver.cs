@@ -6,9 +6,11 @@ namespace OpenTabletDriver.Environ.Drivers
     {
         protected override string FriendlyName => "Wacom";
 
-        protected override (string, string) LinuxModuleName => ("Wacom", "wacom");
+        protected override string LinuxFriendlyName => FriendlyName;
 
-        protected override string[] WinProcessNames => Array.Empty<string>();
+        protected override string LinuxModuleName => "wacom";
+
+        protected override string[] WinProcessNames { get; } = Array.Empty<string>();
 
         protected override string[] Heuristics { get; } = new string[]
         {
