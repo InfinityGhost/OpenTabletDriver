@@ -26,6 +26,7 @@ namespace OpenTabletDriver.Environ.Drivers
 
         private string[] Exclusions = new string[]
         {
+            "OpenTabletDriver",
             "Huion",
             "Gaomon",
             "Veikk"
