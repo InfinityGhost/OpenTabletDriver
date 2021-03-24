@@ -30,7 +30,6 @@ namespace OpenTabletDriver
             return ownedInstances.Any(i => i.Name == name);
         }
 
-
         private const string MUTEX_PREFIX = @"Global\";
         private readonly static List<Instance> ownedInstances = new List<Instance>();
 
