@@ -1,6 +1,6 @@
 namespace OpenTabletDriver.Environ.Drivers
 {
-    internal class GaomonDriver : ProcessModuleQueryableDriver
+    internal class GaomonDriverInfoProvider : ProcessModuleQueryableDriverInfoProvider
     {
         protected override string FriendlyName => "Gaomon";
 

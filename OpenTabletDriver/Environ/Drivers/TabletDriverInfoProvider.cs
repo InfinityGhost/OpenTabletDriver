@@ -4,7 +4,7 @@ using OpenTabletDriver.Plugin;
 
 namespace OpenTabletDriver.Environ.Drivers
 {
-    internal class TabletDriver : IDriverInfoProvider
+    internal class TabletDriverInfoProvider : IDriverInfoProvider
     {
         private readonly string[] ProcessNames = new string[]
         {

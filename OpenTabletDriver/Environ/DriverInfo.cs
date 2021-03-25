@@ -43,17 +43,17 @@ namespace OpenTabletDriver.Environ
         {
             var providers = new IDriverInfoProvider[]
             {
-                new WacomDriver(),
-                new GaomonDriver(),
-                new HuionDriver(),
-                new XPPenDriver(),
-                new VeikkDriver(),
-                new Drivers.OpenTabletDriver(),
-                new TabletDriver()
+                new WacomDriverInfoProvider(),
+                new GaomonDriverInfoProvider(),
+                new HuionDriverInfoProvider(),
+                new XPPenDriverInfoProvider(),
+                new VeikkDriverInfoDriver(),
+                new OpenTabletDriverInfoProvider(),
+                new TabletDriverInfoProvider()
             };
 
             SystemProcesses = Process.GetProcesses();
-            ProcessModuleQueryableDriver.Refresh();
+            ProcessModuleQueryableDriverInfoProvider.Refresh();
 
             // Remove "UC Logic" duplicates
             return providers.Select(provider => provider.GetDriverInfo())

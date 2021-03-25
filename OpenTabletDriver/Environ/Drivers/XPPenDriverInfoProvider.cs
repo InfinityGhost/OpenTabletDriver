@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace OpenTabletDriver.Environ.Drivers
 {
-    internal class XPPenDriver : ProcessModuleQueryableDriver
+    internal class XPPenDriverInfoProvider : ProcessModuleQueryableDriverInfoProvider
     {
         protected override string FriendlyName => "XP-Pen";
 

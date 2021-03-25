@@ -8,7 +8,7 @@ using OpenTabletDriver.Plugin;
 
 namespace OpenTabletDriver.Environ.Drivers
 {
-    internal abstract class ProcessModuleQueryableDriver : IDriverInfoProvider
+    internal abstract class ProcessModuleQueryableDriverInfoProvider : IDriverInfoProvider
     {
         protected abstract string FriendlyName { get; }
         protected abstract string LinuxFriendlyName { get; }

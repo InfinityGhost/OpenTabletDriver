@@ -1,6 +1,6 @@
 namespace OpenTabletDriver.Environ.Drivers
 {
-    public class OpenTabletDriver : IDriverInfoProvider
+    public class OpenTabletDriverInfoProvider : IDriverInfoProvider
     {
         public DriverInfo GetDriverInfo()
         {

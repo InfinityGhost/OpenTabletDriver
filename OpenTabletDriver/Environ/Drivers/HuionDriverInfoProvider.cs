@@ -1,8 +1,8 @@
 namespace OpenTabletDriver.Environ.Drivers
 {
-    internal class VeikkDriver : ProcessModuleQueryableDriver
+    internal class HuionDriverInfoProvider : ProcessModuleQueryableDriverInfoProvider
     {
-        protected override string FriendlyName => "Veikk";
+        protected override string FriendlyName => "Huion";
 
         protected override string LinuxFriendlyName => "UC Logic";
 
@@ -10,13 +10,12 @@ namespace OpenTabletDriver.Environ.Drivers
 
         protected override string[] WinProcessNames { get; } = new string[]
         {
-            "TabletDriverCenter",
-            "TabletDriverSetting"
+            "TabletDriverCore"
         };
 
         protected override string[] Heuristics { get; } = new string[]
         {
-            "Veikk"
+            "Huion"
         };
     }
 }

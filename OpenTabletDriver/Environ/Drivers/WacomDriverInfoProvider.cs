@@ -2,7 +2,7 @@ using System;
 
 namespace OpenTabletDriver.Environ.Drivers
 {
-    internal class WacomDriver : ProcessModuleQueryableDriver
+    internal class WacomDriverInfoProvider : ProcessModuleQueryableDriverInfoProvider
     {
         protected override string FriendlyName => "Wacom";
 
