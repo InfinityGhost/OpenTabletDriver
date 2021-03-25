@@ -7,7 +7,6 @@ using Eto.Forms;
 using OpenTabletDriver.Desktop;
 using OpenTabletDriver.Desktop.Contracts;
 using OpenTabletDriver.Desktop.Interop;
-using OpenTabletDriver.Desktop.Migration;
 using OpenTabletDriver.Desktop.RPC;
 using OpenTabletDriver.Plugin;
 
@@ -33,7 +32,7 @@ namespace OpenTabletDriver.UX
 
             int code = root.Invoke(args);
             if (code != 0)
-                Environment.Exit(code);
+                System.Environment.Exit(code);
 
             var app = new Application(platform);
             var mainForm = new MainForm();

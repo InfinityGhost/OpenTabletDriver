@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using OpenTabletDriver.Interop;
 using OpenTabletDriver.Plugin;
 
-namespace OpenTabletDriver.Environ.Drivers
+namespace OpenTabletDriver.Environment.Drivers
 {
     internal abstract class ProcessModuleQueryableDriverInfoProvider : IDriverInfoProvider
     {

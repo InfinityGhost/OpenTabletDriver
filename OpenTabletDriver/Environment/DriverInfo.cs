@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using OpenTabletDriver.Environ.Drivers;
+using OpenTabletDriver.Environment.Drivers;
 
-namespace OpenTabletDriver.Environ
+namespace OpenTabletDriver.Environment
 {
     /// <summary>
     /// Contains information and hints about an installed tablet driver.

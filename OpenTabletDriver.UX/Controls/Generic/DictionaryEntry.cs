@@ -24,7 +24,7 @@ namespace OpenTabletDriver.UX.Controls.Generic
             {
                 PlaceholderText = "Key",
                 ToolTip =
-                    "The dictionary entry's key. This is what is indexed to find a value." + Environment.NewLine +
+                    "The dictionary entry's key. This is what is indexed to find a value." + System.Environment.NewLine +
                     "If left empty, the entry will be removed on save or apply."
             };
 

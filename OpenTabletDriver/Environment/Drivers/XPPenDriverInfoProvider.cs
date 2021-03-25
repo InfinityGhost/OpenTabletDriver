@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace OpenTabletDriver.Environ.Drivers
+namespace OpenTabletDriver.Environment.Drivers
 {
     internal class XPPenDriverInfoProvider : ProcessModuleQueryableDriverInfoProvider
     {

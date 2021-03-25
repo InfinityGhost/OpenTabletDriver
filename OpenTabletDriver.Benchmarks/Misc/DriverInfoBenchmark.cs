@@ -1,6 +1,6 @@
 using System.Linq;
 using BenchmarkDotNet.Attributes;
-using OpenTabletDriver.Environ;
+using OpenTabletDriver.Environment;
 
 namespace OpenTabletDriver.Benchmarks.Misc
 {

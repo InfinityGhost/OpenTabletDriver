@@ -1,4 +1,4 @@
-namespace OpenTabletDriver.Environ
+namespace OpenTabletDriver.Environment
 {
     internal interface IDriverInfoProvider
     {

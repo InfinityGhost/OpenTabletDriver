@@ -100,9 +100,9 @@ namespace OpenTabletDriver.Desktop.Interop
 
         private static IVirtualScreen ConstructLinuxDisplay()
         {
-            if (Environment.GetEnvironmentVariable("WAYLAND_DISPLAY") != null)
+            if (System.Environment.GetEnvironmentVariable("WAYLAND_DISPLAY") != null)
                 return new WaylandDisplay();
-            else if (Environment.GetEnvironmentVariable("DISPLAY") != null)
+            else if (System.Environment.GetEnvironmentVariable("DISPLAY") != null)
                 return new XScreen();
 
             Log.Write("Display", "Neither Wayland nor X11 were detected, defaulting to X11.", LogLevel.Warning);

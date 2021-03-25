@@ -138,7 +138,7 @@ namespace OpenTabletDriver.UX
                                     break;
                                 case DialogResult.No:
                                 default:
-                                    Environment.Exit(0);
+                                    System.Environment.Exit(0);
                                     break;
                             }
                         });
@@ -482,7 +482,7 @@ namespace OpenTabletDriver.UX
                 if (settings.TabletWidth == 0 || settings.TabletHeight == 0)
                 {
                     var result = MessageBox.Show(
-                        "Warning: Your tablet area is invalid. Saving this configuration may cause problems." + Environment.NewLine +
+                        "Warning: Your tablet area is invalid. Saving this configuration may cause problems." + System.Environment.NewLine +
                         "Are you sure you want to save your configuration?",
                         MessageBoxButtons.YesNo,
                         MessageBoxType.Warning

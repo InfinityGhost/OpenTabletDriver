@@ -39,7 +39,7 @@ namespace OpenTabletDriver.Desktop
             get
             {
                 var path = Path.Join(ProgramDirectory, "Configurations");
-                var fallbackPath = Path.Join(Environment.CurrentDirectory, "Configurations");
+                var fallbackPath = Path.Join(System.Environment.CurrentDirectory, "Configurations");
                 return Directory.Exists(path) ? path : fallbackPath;
             }
         }
@@ -51,9 +51,9 @@ namespace OpenTabletDriver.Desktop
                 var path = Path.Join(ProgramDirectory, "userdata");
                 var fallbackPath = SystemInterop.CurrentPlatform switch
                 {
-                    PluginPlatform.Windows => Path.Join(Environment.GetEnvironmentVariable("LOCALAPPDATA"), "OpenTabletDriver"),
-                    PluginPlatform.Linux   => Path.Join(Environment.GetEnvironmentVariable("HOME"), ".config", "OpenTabletDriver"),
-                    PluginPlatform.MacOS   => Path.Join(Environment.GetEnvironmentVariable("HOME"), "Library", "Application Support", "OpenTabletDriver"),
+                    PluginPlatform.Windows => Path.Join(System.Environment.GetEnvironmentVariable("LOCALAPPDATA"), "OpenTabletDriver"),
+                    PluginPlatform.Linux   => Path.Join(System.Environment.GetEnvironmentVariable("HOME"), ".config", "OpenTabletDriver"),
+                    PluginPlatform.MacOS   => Path.Join(System.Environment.GetEnvironmentVariable("HOME"), "Library", "Application Support", "OpenTabletDriver"),
                     _                       => null
                 };
                 return Directory.Exists(path) ? path : fallbackPath;
