@@ -10,6 +10,7 @@ namespace OpenTabletDriver
         public Instance(string name)
         {
             this.mutex = new Mutex(true, $"{MUTEX_PREFIX}{name}", out bool createdNew);
+            this.Name = name;
             AlreadyExists = !createdNew;
             if (createdNew)
                 ownedInstances.Add(this);
