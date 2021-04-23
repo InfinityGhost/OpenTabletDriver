@@ -2,8 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.Serialization;
 using HidSharp;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using OpenTabletDriver.Plugin.Logging;
 
 namespace OpenTabletDriver.Desktop.Diagnostics
@@ -33,6 +35,12 @@ namespace OpenTabletDriver.Desktop.Diagnostics
         private static string GetAppVersion()
         {
             return "OpenTabletDriver v" + Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+        }
+
+        [OnError]
+        internal void OnError(StreamingContext _, ErrorContext errorContext)
+        {
+            errorContext.Handled = true;
         }
 
         public override string ToString()
