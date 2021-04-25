@@ -20,7 +20,6 @@ using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Logging;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
-using OpenTabletDriver.Plugin.Tablet.Interpolator;
 
 namespace OpenTabletDriver.Daemon
 {
@@ -40,9 +39,15 @@ namespace OpenTabletDriver.Daemon
                 if (debugging)
                 {
                     if (Driver.TabletReader != null)
-                        Driver.TabletReader.Report += DebugReportHandler;
+                    {
+                        Driver.TabletReader.RawClone = true;
+                        Driver.TabletReader.RawReport += DebugReportHandler;
+                    }
                     if (Driver.AuxReader != null)
-                        Driver.AuxReader.Report += DebugReportHandler;
+                    {
+                        Driver.AuxReader.RawClone = true;
+                        Driver.AuxReader.RawReport += DebugReportHandler;
+                    }
                 }
             };
             Driver.DevicesChanged += async (sender, args) =>
@@ -122,15 +127,20 @@ namespace OpenTabletDriver.Daemon
             var pluginDir = new DirectoryInfo(AppInfo.Current.PluginDirectory);
             if (pluginDir.Exists)
             {
-                AppInfo.PluginManager.Load();
+                var pluginManager = AppInfo.PluginManager;
+                pluginManager.Load();
+
                 // Migrate if settings is available to avoid invalid settings
                 if (Settings != null)
                     Settings = SettingsMigrator.Migrate(Settings);
+
+                // Add services to inject on plugin construction
+                pluginManager.AddService<IDriver>(() => this.Driver);
             }
             else
             {
                 pluginDir.Create();
-                Log.Write("Detect", $"The plugin directory '{pluginDir.FullName}' has been created");
+                Log.Write("Plugin", $"The plugin directory '{pluginDir.FullName}' has been created");
             }
             return Task.CompletedTask;
         }
@@ -179,24 +189,19 @@ namespace OpenTabletDriver.Daemon
 
         public async Task SetSettings(Settings settings)
         {
-            // Dispose all interpolators to begin changing settings
-            foreach (var interpolator in Driver.Interpolators)
-                interpolator.Dispose();
-            Driver.Interpolators.Clear();
-            
             // Dispose filters that implement IDisposable interface
-            if (Driver.OutputMode?.Filters != null)
+            if (Driver.OutputMode?.Elements != null)
             {
-                foreach (var filter in Driver.OutputMode.Filters)
+                foreach (var element in Driver.OutputMode.Elements)
                 {
                     try
                     {
-                        if (filter is IDisposable disposableFilter)
-                            disposableFilter.Dispose();
+                        if (element is IDisposable disposable)
+                            disposable.Dispose();
                     }
                     catch (Exception)
                     {
-                        Log.Write("Plugin", $"Unable to dispose object '{filter.GetType().Name}'", LogLevel.Error);
+                        Log.Write("Plugin", $"Unable to dispose object '{element.GetType().Name}'", LogLevel.Error);
                     }
                 }
             }
@@ -230,7 +235,6 @@ namespace OpenTabletDriver.Daemon
             }
 
             SetToolSettings();
-            SetInterpolatorSettings();
         }
 
         public async Task ResetSettings()
@@ -242,15 +246,15 @@ namespace OpenTabletDriver.Daemon
         {
             outputMode.Tablet = Driver.Tablet;
 
-            var filters = from store in Settings.Filters
+            var elements = from store in Settings.Filters
                 where store.Enable == true
-                let filter = store.Construct<IFilter>()
+                let filter = store.Construct<IPositionedPipelineElement<IDeviceReport>>()
                 where filter != null
                 select filter;
-            outputMode.Filters = filters.ToList();
+            outputMode.Elements = elements.ToList();
 
-            if (outputMode.Filters != null && outputMode.Filters.Count() > 0)
-                Log.Write("Settings", $"Filters: {string.Join(", ", outputMode.Filters)}");
+            if (outputMode.Elements != null && outputMode.Elements.Count() > 0)
+                Log.Write("Settings", $"Filters: {string.Join(", ", outputMode.Elements)}");
         }
 
         private void SetAbsoluteModeSettings(AbsoluteOutputMode absoluteMode)
@@ -305,6 +309,10 @@ namespace OpenTabletDriver.Daemon
             BindingHandler.TipActivationPressure = Settings.TipActivationPressure;
             Log.Write("Settings", $"Tip Binding: [{BindingHandler.TipBinding}]@{BindingHandler.TipActivationPressure}%");
 
+            BindingHandler.EraserBinding = Settings.EraserButton?.Construct<IBinding>();
+            BindingHandler.EraserActivationPressure = Settings.EraserActivationPressure;
+            Log.Write("Settings", $"Eraser Binding: [{BindingHandler.EraserBinding}]@{BindingHandler.EraserActivationPressure}%");
+
             if (Settings.PenButtons != null)
             {
                 for (int index = 0; index < Settings.PenButtons.Count; index++)
@@ -350,29 +358,6 @@ namespace OpenTabletDriver.Daemon
             }
         }
 
-        private void SetInterpolatorSettings()
-        {
-            foreach (PluginSettingStore store in Settings.Interpolators)
-            {
-                if (store.Enable == false)
-                    continue;
-
-                if (store.Construct<Interpolator>(SystemInterop.Timer) is Interpolator interpolator)
-                {
-                    var filters = from filterStore in Settings?.Filters
-                        let filter = filterStore.Construct<IFilter>()
-                        where filter != null
-                        where filter.FilterStage == FilterStage.PreInterpolate
-                        select filter;
-
-                    interpolator.Filters = filters.ToList();
-                    interpolator.Enabled = true;
-                    Driver.Interpolators.Add(interpolator);
-                    Log.Write("Settings", $"Interpolator: {interpolator}");
-                }
-            }
-        }
-
         public Task<Settings> GetSettings()
         {
             return Task.FromResult(Settings);
@@ -391,22 +376,28 @@ namespace OpenTabletDriver.Daemon
 
         public Task SetTabletDebug(bool enabled)
         {
+            if (Driver.TabletReader != null)
+                Driver.TabletReader.RawClone = enabled;
+            if (Driver.AuxReader != null)
+                Driver.AuxReader.RawClone = enabled;
+
             if (enabled && !debugging)
             {
                 if (Driver.TabletReader != null)
-                    Driver.TabletReader.Report += DebugReportHandler;
+                    Driver.TabletReader.RawReport += DebugReportHandler;
                 if (Driver.AuxReader != null)
-                    Driver.AuxReader.Report += DebugReportHandler;
+                    Driver.AuxReader.RawReport += DebugReportHandler;
                 debugging = true;
             }
             else if (!enabled && debugging)
             {
                 if (Driver.TabletReader != null)
-                    Driver.TabletReader.Report -= DebugReportHandler;
+                    Driver.TabletReader.RawReport -= DebugReportHandler;
                 if (Driver.AuxReader != null)
-                    Driver.AuxReader.Report -= DebugReportHandler;
+                    Driver.AuxReader.RawReport -= DebugReportHandler;
                 debugging = false;
             }
+
             return Task.CompletedTask;
         }
 
