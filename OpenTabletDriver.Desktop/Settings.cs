@@ -75,9 +75,10 @@ namespace OpenTabletDriver.Desktop
         {
             set
             {
+                var prevValue = DisplayWidth;
                 RaiseAndSetIfChanged(ref _dW, value);
                 if (LockAspectRatio)
-                    TabletHeight = DisplayHeight / DisplayWidth * TabletWidth;
+                    TabletWidth *= DisplayWidth / prevValue;
             }
             get => _dW;
         }
@@ -87,9 +88,10 @@ namespace OpenTabletDriver.Desktop
         {
             set
             {
+                var prevValue = DisplayHeight;
                 RaiseAndSetIfChanged(ref _dH, value);
                 if (LockAspectRatio)
-                    TabletWidth = DisplayWidth / DisplayHeight * TabletHeight;
+                    TabletHeight *= DisplayHeight / prevValue;
             }
             get => _dH;
         }
