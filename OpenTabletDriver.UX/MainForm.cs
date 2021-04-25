@@ -19,7 +19,7 @@ namespace OpenTabletDriver.UX
 {
     using static App;
 
-    public class MainForm : DesktopForm
+    public class MainForm : DesktopForm, IUserInterface
     {
         public MainForm()
             : base()
@@ -173,6 +173,18 @@ namespace OpenTabletDriver.UX
                     new StackLayoutItem(null, true)
                 }
             };
+        }
+
+        public async Task ShowClient()
+        {
+            await Application.Instance.InvokeAsync(() =>
+            {
+                if (Application.Instance?.MainForm is Form form)
+                {
+                    form.Show();
+                    form.BringToFront();
+                }
+            });
         }
 
         private Control ConstructMainControls()
