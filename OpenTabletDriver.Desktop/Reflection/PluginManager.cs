@@ -3,9 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
+using System.Threading;
+using System.Threading.Tasks;
 using OpenTabletDriver.Plugin;
-using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.DependencyInjection;
 
 namespace OpenTabletDriver.Desktop.Reflection
@@ -14,79 +14,86 @@ namespace OpenTabletDriver.Desktop.Reflection
     {
         public PluginManager()
         {
-            var internalTypes = from asm in AssemblyLoadContext.Default.Assemblies
-                where IsLoadable(asm)
-                from type in asm.DefinedTypes
-                where type.IsPublic && !(type.IsInterface || type.IsAbstract)
-                where IsPluginType(type)
-                where IsPlatformSupported(type)
-                select type;
-
-            pluginTypes = new ConcurrentBag<TypeInfo>(internalTypes);
+            Task.Run(() =>
+            {
+                pluginTypes = new ConcurrentDictionary<Type, List<Type>>();
+                internalImplementations = RetrieveAssemblies();
+                LoadImplementableTypes();
+                LoadInternalPluginTypes();
+                waitHandle.Set();
+            });
         }
 
-        public IReadOnlyCollection<TypeInfo> PluginTypes => pluginTypes;
-        protected ConcurrentBag<TypeInfo> pluginTypes;
+        private ManualResetEventSlim waitHandle = new ManualResetEventSlim();
+        private ConcurrentDictionary<Type, List<Type>> pluginTypes;
+        private Assembly[] internalImplementations;
+        private Type[] implementableTypes;
 
-        protected readonly static IEnumerable<Type> libTypes =
-            from type in Assembly.GetAssembly(typeof(IDriver)).GetExportedTypes()
-                where type.IsAbstract || type.IsInterface
-                select type;
-
-        public virtual PluginReference GetPluginReference(string path) => new PluginReference(this, path);
-        public virtual PluginReference GetPluginReference(Type type) => GetPluginReference(type.FullName);
-        public virtual PluginReference GetPluginReference(object obj) => GetPluginReference(obj.GetType());
-
-        public virtual T ConstructObject<T>(string name, object[] args = null) where T : class
+        public IEnumerable<Type> PluginTypes
         {
-            args ??= new object[0];
+            get
+            {
+                WaitUntilReady();
+                return pluginTypes.Values.SelectMany(t => t);
+            }
+        }
+
+        protected virtual Assembly[] RetrieveAssemblies()
+        {
+            return new Assembly[] { typeof(Driver).Assembly };
+        }
+
+        public IReadOnlyCollection<Type> GetChildTypes<T>()
+        {
+            WaitUntilReady();
+            var type = typeof(T);
+            if (type.IsGenericType)
+                type = type.GetGenericTypeDefinition();
+
+            return pluginTypes.TryGetValue(type, out var childTypes) ? childTypes : Array.Empty<Type>();
+        }
+
+        public T ConstructObject<T>(string name, params object[] parameters) where T : class
+        {
+            WaitUntilReady();
             if (!string.IsNullOrWhiteSpace(name))
             {
+                var objectType = GetChildTypes<T>().FirstOrDefault(t => t.FullName == name);
                 try
                 {
-                    if (PluginTypes.FirstOrDefault(t => t.FullName == name) is TypeInfo type)
+                    var obj = (T)Activator.CreateInstance(objectType, parameters);
+
+                    if (obj != null)
                     {
-                        var matchingConstructors = from ctor in type.GetConstructors()
-                            let parameters = ctor.GetParameters()
-                            where parameters.Length == args.Length
-                            where IsValidParameterFor(args, parameters)
-                            select ctor;
+                        var resolvedProperties = from property in objectType.GetProperties()
+                            where property.GetCustomAttribute<ResolvedAttribute>() is ResolvedAttribute
+                            select property;
 
-                        if (matchingConstructors.FirstOrDefault() is ConstructorInfo constructor)
+                        foreach (var property in resolvedProperties)
                         {
-                            T obj = (T)constructor.Invoke(args) ?? null;
-                            
-                            if (obj != null)
-                            {
-                                var resolvedProperties = from property in type.GetProperties()
-                                    where property.GetCustomAttribute<ResolvedAttribute>() is ResolvedAttribute
-                                    select property;
-
-                                foreach (var property in resolvedProperties)
-                                {
-                                    var service = GetService(property.PropertyType);
-                                    if (service != null)
-                                        property.SetValue(obj, service);
-                                }
-
-                                var resolvedFields = from field in type.GetFields()
-                                    where field.GetCustomAttribute<ResolvedAttribute>() is ResolvedAttribute
-                                    select field;
-
-                                foreach (var field in resolvedFields)
-                                {
-                                    var service = GetService(field.FieldType);
-                                    if (service != null)
-                                        field.SetValue(obj, service);
-                                }
-                            }
-                            return obj;
+                            var service = GetService(property.PropertyType);
+                            if (service != null)
+                                property.SetValue(obj, service);
                         }
-                        else
+
+                        var resolvedFields = from field in objectType.GetFields()
+                            where field.GetCustomAttribute<ResolvedAttribute>() is ResolvedAttribute
+                            select field;
+
+                        foreach (var field in resolvedFields)
                         {
-                            Log.Write("Plugin", $"No constructor found for '{name}'", LogLevel.Error);
+                            var service = GetService(field.FieldType);
+                            if (service != null)
+                                field.SetValue(obj, service);
                         }
                     }
+
+                    return obj;
+                }
+                catch (MissingMethodException e)
+                {
+                    Log.Write("Plugin", $"No matching constructor found for '{name}'", LogLevel.Error);
+                    Log.Write("Plugin", $"{e}", LogLevel.Debug);
                 }
                 catch (TargetInvocationException e) when (e.Message == "Exception has been thrown by the target of an invocation.")
                 {
@@ -95,65 +102,98 @@ namespace OpenTabletDriver.Desktop.Reflection
                 }
                 catch (Exception e)
                 {
-                    Log.Write("Plugin", $"Unable to construct object '{name}'", LogLevel.Error);
-                    Log.Exception(e);
+                    Log.Write("Plugin", $"Failed to construct object '{name}'", LogLevel.Error);
+                    Log.Write("Plugin", $"{e.InnerException ?? e}", LogLevel.Debug);
                 }
             }
             return null;
         }
 
-        public virtual IReadOnlyCollection<TypeInfo> GetChildTypes<T>()
+        public PluginReference GetPluginReference(string path)
         {
-            var children = from type in PluginTypes
-                where typeof(T).IsAssignableFrom(type)
-                select type;
-
-            return children.ToArray();
+            WaitUntilReady();
+            return new PluginReference(this, path);
         }
 
-        protected virtual bool IsValidParameterFor(object[] args, ParameterInfo[] parameters)
+        public PluginReference GetPluginReference(Type type)
         {
-            for (int i = 0; i < parameters.Length; i++)
+            return GetPluginReference(type.FullName);
+        }
+
+        private void Add(Type pluginType, Type implementedType)
+        {
+            pluginTypes.AddOrUpdate(implementedType,
+                (t) => new List<Type>() { pluginType },
+                (t, l) =>
+                {
+                    l.Add(pluginType);
+                    return l;
+                }
+            );
+        }
+
+        public void Add(Type pluginType)
+        {
+            WaitUntilReady();
+            foreach (var implementedType in GetImplementedPluginTypes(pluginType))
             {
-                var parameter = parameters[i];
-                var arg = args[i];
-                if (!parameter.ParameterType.IsAssignableFrom(arg.GetType()))
-                    return false;
+                Add(pluginType, implementedType);
             }
-            return true;
         }
 
-        protected virtual bool IsPluginType(Type type)
+        public bool Remove(Type pluginType)
         {
-            return !type.IsAbstract && !type.IsInterface &&
-                libTypes.Any(t => t.IsAssignableFrom(type) ||
-                    type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == t));
-        }
-
-        protected virtual bool IsPlatformSupported(Type type)
-        {
-            var attr = (SupportedPlatformAttribute)type.GetCustomAttribute(typeof(SupportedPlatformAttribute), false);
-            return attr?.IsCurrentPlatform ?? true;
-        }
-
-        protected virtual bool IsPluginIgnored(Type type)
-        {
-            return type.GetCustomAttributes(false).Any(a => a.GetType() == typeof(PluginIgnoreAttribute));
-        }
-
-        protected virtual bool IsLoadable(Assembly asm)
-        {
-            try
+            WaitUntilReady();
+            return GetImplementedPluginTypes(pluginType).All(implementedType =>
             {
-                _ = asm.DefinedTypes;
-                return true;
-            }
-            catch
-            {
-                var asmName = asm.GetName();
-                Log.Write("Plugin", $"Plugin '{asmName.Name}, Version={asmName.Version}' can't be loaded and is likely out of date.", LogLevel.Warning);
+                if (pluginTypes.TryGetValue(implementedType, out var list))
+                {
+                    return list.Remove(pluginType);
+                }
                 return false;
+            });
+        }
+
+        private void LoadImplementableTypes()
+        {
+            implementableTypes = typeof(IDriver).Assembly.ExportedTypes
+                .Where(type => type.IsAbstract | type.IsInterface)
+                .ToArray();
+        }
+
+        private void LoadInternalPluginTypes()
+        {
+            foreach (var subType in internalImplementations.SelectMany(asm => asm.ExportedTypes))
+            {
+                foreach (var implementedType in GetImplementedPluginTypes(subType))
+                {
+                    Add(subType, implementedType);
+                }
             }
+        }
+
+        private IEnumerable<Type> GetImplementedPluginTypes(Type subType)
+        {
+            foreach (var implementableType in implementableTypes)
+            {
+                if (subType.IsAssignableTo(implementableType))
+                {
+                    yield return implementableType;
+                }
+                else
+                {
+                    foreach (var _ in subType.GetInterfaces().Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == implementableType))
+                    {
+                        yield return implementableType;
+                    }
+                }
+            }
+        }
+
+        private void WaitUntilReady()
+        {
+            if (!waitHandle.IsSet)
+                waitHandle.Wait();
         }
     }
 }

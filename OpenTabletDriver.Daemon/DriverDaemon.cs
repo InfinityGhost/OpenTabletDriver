@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using HidSharp;
 using OpenTabletDriver.Desktop;
@@ -93,6 +94,8 @@ namespace OpenTabletDriver.Daemon
             {
                 await ResetSettings();
             }
+
+            waitHandle.Set();
         }
 
         public event EventHandler<LogMessage> Message;
@@ -103,6 +106,7 @@ namespace OpenTabletDriver.Daemon
         private Settings Settings { set; get; }
         private Collection<LogMessage> LogMessages { set; get; } = new Collection<LogMessage>();
         private Collection<ITool> Tools { set; get; } = new Collection<ITool>();
+        private ManualResetEventSlim waitHandle = new ManualResetEventSlim();
 
         private bool debugging;
 
@@ -201,7 +205,7 @@ namespace OpenTabletDriver.Daemon
 
             Settings = SettingsMigrator.Migrate(settings);
 
-            var pluginRef = Settings.OutputMode?.GetPluginReference() ?? AppInfo.PluginManager.GetPluginReference(typeof(AbsoluteMode));
+            var pluginRef = Settings.OutputMode?.GetPluginReference();
             Driver.OutputMode = pluginRef.Construct<IOutputMode>();
 
             if (Driver.OutputMode != null)
@@ -418,6 +422,14 @@ namespace OpenTabletDriver.Daemon
         {
             if (report != null)
                 DeviceReport?.Invoke(this, new RpcData(report));
+        }
+
+        public Task WaitForLoadCompletion()
+        {
+            if (!waitHandle.IsSet)
+                waitHandle.Wait();
+
+            return Task.CompletedTask;
         }
     }
 }

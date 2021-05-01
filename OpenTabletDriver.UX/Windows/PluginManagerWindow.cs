@@ -67,8 +67,12 @@ namespace OpenTabletDriver.UX.Windows
             metadataViewer.RequestPluginUninstall += async (meta) => await Uninstall(pluginList.SelectedPlugin);
             metadataViewer.RequestPluginInstall += async (meta) => await DownloadAndInstall(meta);
 
+            Closed += (_, _) => IsClosed = true;
+
             _ = Refresh();
         }
+
+        public bool IsClosed { get; private set; }
 
         private static PluginMetadataCollection Repository;
         private readonly PluginDropPanel dropPanel = new PluginDropPanel();
@@ -83,7 +87,7 @@ namespace OpenTabletDriver.UX.Windows
         public async Task Refresh()
         {
             var repoFetch = PluginMetadataCollection.DownloadAsync();
-            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
+            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30));
             PluginMetadataCollection collection = null;
 
             try
@@ -172,7 +176,6 @@ namespace OpenTabletDriver.UX.Windows
         {
             if (await App.Driver.Instance.InstallPlugin(path))
             {
-                AppInfo.PluginManager.Load();
                 await Refresh();
             }
             else

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -9,6 +8,7 @@ using System.Threading.Tasks;
 using OpenTabletDriver.Desktop.Interop;
 using OpenTabletDriver.Desktop.Reflection.Metadata;
 using OpenTabletDriver.Plugin;
+using OpenTabletDriver.Reflection.Extensions;
 
 namespace OpenTabletDriver.Desktop.Reflection
 {
@@ -39,6 +39,11 @@ namespace OpenTabletDriver.Desktop.Reflection
 
         public IReadOnlyCollection<DesktopPluginContext> GetLoadedPlugins() => Plugins;
 
+        protected override Assembly[] RetrieveAssemblies()
+        {
+            return new Assembly[] { typeof(Driver).Assembly, typeof(DesktopDriver).Assembly };
+        }
+
         public void Clean()
         {
             try
@@ -67,7 +72,9 @@ namespace OpenTabletDriver.Desktop.Reflection
         public void Load()
         {
             foreach (var dir in PluginDirectory.GetDirectories())
+            {
                 LoadPlugin(dir);
+            }
 
             AppInfo.PluginManager.ResetServices();
         }
@@ -94,35 +101,27 @@ namespace OpenTabletDriver.Desktop.Reflection
             }
         }
 
-        protected void ImportTypes(PluginContext context)
+        private void ImportTypes(DesktopPluginContext context)
         {
-            var types = from asm in context.Assemblies
-                where IsLoadable(asm)
-                from type in asm.GetExportedTypes()
-                where IsPluginType(type)
-                select type;
-
-            types.AsParallel().ForAll(type =>
+            try
             {
-                if (!IsPlatformSupported(type))
+                foreach (var type in context.Assemblies.SelectMany(asm => asm.GetExportedTypes()))
                 {
-                    Log.Write("Plugin", $"Plugin '{type.FullName}' is not supported on {DesktopInterop.CurrentPlatform}", LogLevel.Info);
-                    return;
-                }
-                if (IsPluginIgnored(type))
-                    return;
+                    if (!type.IsPlatformSupported())
+                    {
+                        Log.Write("Plugin", $"Plugin '{type.FullName}' is not supported on {DesktopInterop.CurrentPlatform}", LogLevel.Info);
+                        continue;
+                    }
+                    if (type.IsIgnoredPlugin())
+                        continue;
 
-                try
-                {
-                    var pluginTypeInfo = type.GetTypeInfo();
-                    if (!pluginTypes.Contains(pluginTypeInfo))
-                        pluginTypes.Add(pluginTypeInfo);
+                    Add(type);
                 }
-                catch
-                {
-                    Log.Write("Plugin", $"Plugin '{type.FullName}' incompatible", LogLevel.Warning);
-                }
-            });
+            }
+            catch (TypeLoadException e)
+            {
+                Log.Write("Plugin", $"Failed to load '{context.FriendlyName}'. Incompatible plugin type '{e.TypeName}'");
+            }
         }
 
         public bool InstallPlugin(string filePath)
@@ -216,24 +215,12 @@ namespace OpenTabletDriver.Desktop.Reflection
         {
             Log.Write("Plugin", $"Unloading plugin '{context.FriendlyName}'", LogLevel.Debug);
             Plugins.Remove(context);
-            return context.Assemblies.All(p => RemoveAllTypesForAssembly(p));
+            return context.Assemblies.All(asm => RemoveAllTypesForAssembly(asm));
         }
 
         public bool RemoveAllTypesForAssembly(Assembly asm)
         {
-            try
-            {
-                var types = pluginTypes.Where(t => t.Assembly == asm)
-                    .Select(t => t.GetTypeInfo());
-
-                pluginTypes = new ConcurrentBag<TypeInfo>(pluginTypes.Except(types));
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Exception(ex);
-                return false;
-            }
+            return PluginTypes.Where(t => t.Assembly == asm).ToArray().All(type => Remove(type));
         }
 
         public override void ResetServices()
