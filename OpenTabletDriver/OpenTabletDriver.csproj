@@ -23,12 +23,11 @@
 
   <ItemGroup Label="Project References">
     <ProjectReference Include="..\OpenTabletDriver.Plugin\OpenTabletDriver.Plugin.csproj" />
+    <ProjectReference Include="..\OpenTabletDriver.Analyzers\OpenTabletDriver.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup Label="Configurations">
-    <EmbeddedResource Include=".\Configurations\*\*.json">
-      <IncludeInPackage>true</IncludeInPackage>
-    </EmbeddedResource>
+    <AdditionalFiles Include="Configurations" TabletConfigurationFolder="true" />
   </ItemGroup>
 
 </Project>
