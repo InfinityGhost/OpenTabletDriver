@@ -27,7 +27,9 @@
   </ItemGroup>
 
   <ItemGroup Label="Configurations">
-    <AdditionalFiles Include="Configurations" TabletConfigurationFolder="true" />
+    <AdditionalFiles Include="Configurations\**\*.json" TabletConfiguration="true" />
   </ItemGroup>
+
+  <Import Project="..\OpenTabletDriver.Analyzers\TabletConfigurationGenerator.props" />
 
 </Project>

@@ -82,10 +82,7 @@ namespace OpenTabletDriver
         public DeviceReader<IDeviceReport> TabletReader { private set; get; }
         public DeviceReader<IDeviceReport> AuxReader { private set; get; }
 
-        public static IEnumerable<TabletConfiguration> GetPreCompiledConfigurations()
-        {
-            return CompiledTabletConfig.GetCompiledConfigs();
-        }
+        public virtual IEnumerable<TabletConfiguration> GetConfigurations() => CompiledTabletConfigurations.GetConfigurations();
 
         public bool TryMatch(TabletConfiguration config)
         {

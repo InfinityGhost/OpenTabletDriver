@@ -9,7 +9,8 @@ namespace OpenTabletDriver.Analyzers
 {
     internal static class CodeRepresentation
     {
-        private static Regex OneLine = new Regex(@"\s+");
+        private static Regex OneLine = new Regex(@"\s+", RegexOptions.Compiled);
+        private static Regex StringEscape = new Regex(@"\\", RegexOptions.Compiled);
 
         public static int IndentLevel { get; set; }
 
@@ -33,6 +34,11 @@ namespace OpenTabletDriver.Analyzers
         public static string ToOneLine(this string code)
         {
             return OneLine.Replace(code, " ");
+        }
+
+        public static string Escape(this string str)
+        {
+            return StringEscape.Replace(str, @"\\");
         }
 
         public static string Create(object obj)
@@ -82,7 +88,7 @@ namespace OpenTabletDriver.Analyzers
             switch (obj)
             {
                 case string:
-                    sourceCode = $"@\"{obj}\"";
+                    sourceCode = $"\"{obj}\"".Escape();
                     return true;
                 case float:
                     sourceCode = $"{obj}f";

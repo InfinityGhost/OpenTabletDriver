@@ -11,24 +11,30 @@ namespace OpenTabletDriver.Analyzers
     [Generator]
     public class TabletConfigurationGenerator : ISourceGenerator
     {
-        private const string CLASS_NAME = "CompiledTabletConfig";
+        private const string CLASS_NAME = "CompiledTabletConfigurations";
         private const int YIELD_INDENT = 3;
-        private const string HEADER = @"using System;
+        private static readonly string HEADER =
+@"using System;
 using System.Collections.Generic;
 using OpenTabletDriver.Plugin.Tablet;
 
 namespace OpenTabletDriver
 {
-    public static class CompiledTabletConfig
+    public static class " + CLASS_NAME + @"
     {
-        public static IEnumerable<TabletConfiguration> GetCompiledConfigs()
+        public static IEnumerable<TabletConfiguration> GetConfigurations()
         {
 ";
 
-        private const string FOOTER = @"        }
+        private const string FOOTER =
+@"        }
     }
 }
 ";
+
+        public void Initialize(GeneratorInitializationContext context)
+        {
+        }
 
         public void Execute(GeneratorExecutionContext context)
         {
@@ -39,12 +45,9 @@ namespace OpenTabletDriver
             var configurationSourceCodes = configs.Select(file => GenerateInitializerFromFile(file, serializer));
             var classSourceCode = GenerateCompiledTabletConfigClass(configurationSourceCodes);
 
-            context.AddSource($"{CLASS_NAME}.cs", classSourceCode);
-        }
+            File.WriteAllText($"C:\\OTD\\{CLASS_NAME}.cs", classSourceCode);
 
-        public void Initialize(GeneratorInitializationContext context)
-        {
-            return;
+            context.AddSource($"{CLASS_NAME}.cs", classSourceCode);
         }
 
         private static string GenerateCompiledTabletConfigClass(IEnumerable<string> tabletConfigurations)
@@ -65,11 +68,16 @@ namespace OpenTabletDriver
 
         private static IEnumerable<FileInfo> GetConfigurations(GeneratorExecutionContext context)
         {
-            foreach (AdditionalText file in context.AdditionalFiles)
+            foreach (AdditionalText file in context.AdditionalFiles.Where(f => Path.GetExtension(f.Path) == ".json"))
             {
-                var info = new DirectoryInfo(file.Path);
-                foreach (var tabletConfig in info.EnumerateFiles("*.json", SearchOption.AllDirectories))
-                    yield return tabletConfig;
+                if (context.AnalyzerConfigOptions.GetOptions(file).TryGetValue("build_metadata.AdditionalFiles.TabletConfiguration", out var isConfigString)
+                    && bool.TryParse(isConfigString, out bool isConfig)
+                    && isConfig
+                )
+                {
+                    if (File.Exists(file.Path))
+                        yield return new FileInfo(file.Path);
+                }
             }
         }
 
