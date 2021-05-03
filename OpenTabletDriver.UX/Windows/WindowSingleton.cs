@@ -16,11 +16,14 @@ namespace OpenTabletDriver.UX.Windows
 
             switch (window)
             {
-                case Form:
-                    (window as Form).Show();
+                case DesktopForm desktopForm:
+                    desktopForm.Show();
                     break;
-                case Dialog:
-                    (window as Dialog).ShowModal();
+                case Form form:
+                    form.Show();
+                    break;
+                case Dialog dialog:
+                    dialog.ShowModal();
                     break;
             }
 

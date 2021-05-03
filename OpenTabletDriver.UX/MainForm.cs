@@ -24,8 +24,11 @@ namespace OpenTabletDriver.UX
         public MainForm()
             : base()
         {
+            // Call InitializeForm on ctor since DesktopForm.Show() won't be called on binary launch
+            InitializeForm();
+            InitializePlatform();
+
             UpdateTitle(null);
-            ClientSize = new Size(DEFAULT_CLIENT_WIDTH, DEFAULT_CLIENT_HEIGHT);
             Content = ConstructPlaceholderControl();
 
             Driver.Connected += (_, _) =>
@@ -48,6 +51,8 @@ namespace OpenTabletDriver.UX
             InitializeAsync();
         }
 
+        private const int DEFAULT_CLIENT_WIDTH = 960;
+        private const int DEFAULT_CLIENT_HEIGHT = 760;
         private FileInfo settingsFile;
         private OutputModeEditor outputModeEditor;
         private BindingEditor bindingEditor;
@@ -66,10 +71,28 @@ namespace OpenTabletDriver.UX
             outputModeEditor.Refresh();
         }
 
-        protected override void OnInitializePlatform(EventArgs e)
+        protected override void InitializeForm()
         {
-            base.OnInitializePlatform(e);
+            var bounds = Screen.FromPoint(Mouse.Position).Bounds;
 
+            if (this.WindowState != WindowState.Maximized)
+            {
+                var minWidth = Math.Min(DEFAULT_CLIENT_WIDTH, bounds.Width * 0.95);
+                var minHeight = Math.Min(DEFAULT_CLIENT_HEIGHT, bounds.Height * 0.95);
+
+                this.Size = new Size((int)minWidth, (int)minHeight);
+
+                if (DesktopInterop.CurrentPlatform == PluginPlatform.Windows)
+                {
+                    var x = Screen.WorkingArea.Center.X - (minWidth / 2);
+                    var y = Screen.WorkingArea.Center.Y - (minHeight / 2);
+                    this.Location = new Point((int)x, (int)y);
+                }
+            }
+        }
+
+        protected void InitializePlatform()
+        {
             switch (DesktopInterop.CurrentPlatform)
             {
                 case PluginPlatform.MacOS:
@@ -83,14 +106,6 @@ namespace OpenTabletDriver.UX
                 PluginPlatform.MacOS   => true,
                 _                      => false,
             };
-
-            if (DesktopInterop.CurrentPlatform == PluginPlatform.MacOS)
-            {
-                var bounds = Screen.PrimaryScreen.Bounds;
-                var minWidth = Math.Min(970, bounds.Width * 0.9);
-                var minHeight = Math.Min(770, bounds.Height * 0.9);
-                this.ClientSize = new Size((int)minWidth, (int)minHeight);
-            }
 
             if (App.EnableTrayIcon)
             {

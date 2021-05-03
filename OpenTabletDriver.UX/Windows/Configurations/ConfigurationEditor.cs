@@ -19,7 +19,7 @@ namespace OpenTabletDriver.UX.Windows.Configurations
     public class ConfigurationEditor : DesktopForm
     {
         public ConfigurationEditor()
-            : base()
+            : base(Application.Instance.MainForm)
         {
             base.Title = "Configuration Editor";
             base.ClientSize = new Size(910, 680);
@@ -238,7 +238,7 @@ namespace OpenTabletDriver.UX.Windows.Configurations
             public async Task GenerateConfiguration()
             {
                 var dialog = new DeviceListDialog();
-                if (await dialog.ShowModalAsync() is HidDevice device)
+                if (await dialog.ShowModalAsync(this) is HidDevice device)
                 {
                     try
                     {
