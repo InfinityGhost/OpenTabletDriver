@@ -45,8 +45,6 @@ namespace OpenTabletDriver
             var configurationSourceCodes = configs.Select(file => GenerateInitializerFromFile(file, serializer));
             var classSourceCode = GenerateCompiledTabletConfigClass(configurationSourceCodes);
 
-            File.WriteAllText($"C:\\OTD\\{CLASS_NAME}.cs", classSourceCode);
-
             context.AddSource($"{CLASS_NAME}.cs", classSourceCode);
         }
 
