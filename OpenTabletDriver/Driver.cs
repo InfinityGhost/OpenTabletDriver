@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -81,6 +80,8 @@ namespace OpenTabletDriver
 
         public DeviceReader<IDeviceReport> TabletReader { private set; get; }
         public DeviceReader<IDeviceReport> AuxReader { private set; get; }
+
+        public virtual IEnumerable<TabletConfiguration> GetConfigurations() => CompiledTabletConfigurations.GetConfigurations();
 
         public bool TryMatch(TabletConfiguration config)
         {
