@@ -2,6 +2,7 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Reflection;
+using System.Threading.Tasks;
 using Eto.Drawing;
 using Eto.Forms;
 using OpenTabletDriver.Desktop;
@@ -16,6 +17,13 @@ namespace OpenTabletDriver.UX
     {
         public static void Run(string platform, string[] args)
         {
+            UserInterfaceProxy.Invoke(async userInterface =>
+            {
+                await userInterface.ShowClient();
+                UserInterfaceProxy.Dispose();
+                Environment.Exit(0);
+            });
+
             var root = new RootCommand("OpenTabletDriver UX")
             {
                 new Option<bool>(new string[] { "-m", "--minimized" }, "Start the application minimized")
@@ -36,6 +44,8 @@ namespace OpenTabletDriver.UX
 
             var app = new Application(platform);
             var mainForm = new MainForm();
+            UserInterfaceProxy.Attach(mainForm);
+
             if (startMinimized)
             {
                 mainForm.WindowState = WindowState.Minimized;
@@ -55,6 +65,7 @@ namespace OpenTabletDriver.UX
         public const string FaqUrl = "https://github.com/OpenTabletDriver/OpenTabletDriver/wiki#frequently-asked-questions";
         public static readonly string Version = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 
+        public static RpcProxy<IUserInterface> UserInterfaceProxy = new RpcProxy<IUserInterface>("OpenTabletDriver.UX");
         public static RpcClient<IDriverDaemon> Driver { get; } = new RpcClient<IDriverDaemon>("OpenTabletDriver.Daemon");
         public static Bitmap Logo => _logo.Value;
 
