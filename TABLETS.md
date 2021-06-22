@@ -19,6 +19,7 @@
 | VEIKK A15              |    Supported     |
 | VEIKK S640             |    Supported     |
 | VEIKK S640 V2          |    Supported     |
+| VEIKK VK640            |    Supported     |
 | Wacom CTE-430          |    Supported     |
 | Wacom CTE-460          |    Supported     |
 | Wacom CTE-640          |    Supported     |
@@ -78,7 +79,6 @@
 | VEIKK A15 Pro          | Missing Features | Wheel is unsupported.
 | VEIKK A30              | Missing Features | Touchpad is unsupported.
 | VEIKK A50              | Missing Features | Touchpad is unsupported.
-| VEIKK VK640            | Missing Features | Pen buttons are unsupported.
 | Wacom CTE-450          | Missing Features | Wheel is unsupported.
 | Wacom CTE-650          | Missing Features | Wheel is unsupported.
 | Wacom CTL-6100WL       | Missing Features | Wireless is unsupported.
