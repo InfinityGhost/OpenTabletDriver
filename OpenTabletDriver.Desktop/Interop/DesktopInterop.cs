@@ -5,6 +5,7 @@ using OpenTabletDriver.Desktop.Interop.Input.Absolute;
 using OpenTabletDriver.Desktop.Interop.Input.Keyboard;
 using OpenTabletDriver.Desktop.Interop.Input.Relative;
 using OpenTabletDriver.Desktop.Interop.Timer;
+using OpenTabletDriver.Desktop.Interop.Power;
 using OpenTabletDriver.Interop;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Platform.Display;
@@ -115,5 +116,11 @@ namespace OpenTabletDriver.Desktop.Interop
             Log.Write("Display", "Neither Wayland nor X11 were detected, defaulting to X11.", LogLevel.Warning);
             return new XScreen();
         }
+
+        public static IPowerManager PowerManager => CurrentPlatform switch 
+        {
+            PluginPlatform.Windows => new WindowsPowerManager(),
+            _ => null
+        };
     }
 }
