@@ -19,6 +19,7 @@
 | VEIKK A15              |    Supported     |
 | VEIKK S640             |    Supported     |
 | VEIKK S640 V2          |    Supported     |
+| VEIKK VK640            |    Supported     |
 | Wacom CTE-430          |    Supported     |
 | Wacom CTE-460          |    Supported     |
 | Wacom CTE-640          |    Supported     |
