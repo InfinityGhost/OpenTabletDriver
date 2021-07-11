@@ -8,7 +8,7 @@ namespace OpenTabletDriver.Tests
     [TestClass]
     public class TestBase
     {
-        protected static string TestDirectory = Environment.GetEnvironmentVariable("OPENTABLETDRIVER_TEST") ?? Environment.CurrentDirectory;
+        protected static string TestDirectory = System.Environment.GetEnvironmentVariable("OPENTABLETDRIVER_TEST") ?? System.Environment.CurrentDirectory;
 
         protected class TestAppInfo : AppInfo
         {

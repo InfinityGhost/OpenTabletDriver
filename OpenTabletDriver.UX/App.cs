@@ -41,7 +41,7 @@ namespace OpenTabletDriver.UX
 
             int code = root.Invoke(args);
             if (code != 0)
-                Environment.Exit(code);
+                System.Environment.Exit(code);
 
             var app = new Application(platform);
             var mainForm = new MainForm();

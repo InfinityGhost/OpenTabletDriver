@@ -287,11 +287,11 @@ namespace OpenTabletDriver.Console
 
         private static async Task EditSettings()
         {
-            string editor = Environment.GetEnvironmentVariable("EDITOR");
+            string editor = System.Environment.GetEnvironmentVariable("EDITOR");
             if (!string.IsNullOrWhiteSpace(editor))
             {
                 var settings = await GetSettings();
-                var tempDir = Environment.GetEnvironmentVariable("TEMP") ?? AppInfo.Current.TemporaryDirectory;
+                var tempDir = System.Environment.GetEnvironmentVariable("TEMP") ?? AppInfo.Current.TemporaryDirectory;
                 var tempFile = $"OpenTabletDriver-{Guid.NewGuid()}.json";
                 var sha256 = SHA256.Create();
 

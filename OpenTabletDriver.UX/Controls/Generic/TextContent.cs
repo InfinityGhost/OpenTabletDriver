@@ -19,12 +19,12 @@ namespace OpenTabletDriver.UX.Controls.Generic
                 Add(line);
         }
 
-        public IList<string> Lines => base.Text.Split(Environment.NewLine);
+        public IList<string> Lines => base.Text.Split(System.Environment.NewLine);
 
         public void Add(string line)
         {
             if (!string.IsNullOrWhiteSpace(base.Text))
-                base.Text += Environment.NewLine;
+                base.Text += System.Environment.NewLine;
             base.Text += line;
         }
 

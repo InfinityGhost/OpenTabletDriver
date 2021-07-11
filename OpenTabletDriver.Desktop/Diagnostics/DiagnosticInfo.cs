@@ -19,10 +19,10 @@ namespace OpenTabletDriver.Desktop.Diagnostics
         public string AppVersion { private set; get; } = GetAppVersion();
 
         [JsonProperty("Operating System")]
-        public OperatingSystem OperatingSystem { private set; get; } = Environment.OSVersion;
+        public OperatingSystem OperatingSystem { private set; get; } = System.Environment.OSVersion;
 
         [JsonProperty("Environment Variables")]
-        public IDictionary EnvironmentVariables { private set; get; } = Environment.GetEnvironmentVariables();
+        public IDictionary EnvironmentVariables { private set; get; } = System.Environment.GetEnvironmentVariables();
 
         [JsonProperty("HID Devices")]
         public IEnumerable<HidDevice> Devices { private set; get; } = DeviceList.Local.GetHidDevices();

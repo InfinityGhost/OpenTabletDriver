@@ -92,7 +92,7 @@ namespace OpenTabletDriver.UX.Windows.Plugins
                 if (data.TypeName == typeof(CryptographicException).FullName)
                 {
                     MessageBox.Show(
-                        data.Message + Environment.NewLine + "Report this incident to the developers!",
+                        data.Message + System.Environment.NewLine + "Report this incident to the developers!",
                         "Cryptographic Verification Error",
                         MessageBoxButtons.OK,
                         MessageBoxType.Error

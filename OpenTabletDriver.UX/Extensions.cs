@@ -11,7 +11,7 @@ namespace OpenTabletDriver.UX
         {
             Log.Exception(exception);
             MessageBox.Show(
-                exception.Message + Environment.NewLine + exception.StackTrace,
+                exception.Message + System.Environment.NewLine + exception.StackTrace,
                 $"Error: {exception.GetType().Name}",
                 MessageBoxButtons.OK,
                 MessageBoxType.Error
@@ -20,7 +20,7 @@ namespace OpenTabletDriver.UX
 
         public static void ShowMessageBox(this CommonErrorData errorData)
         {
-            string message = errorData.Message + Environment.NewLine + errorData.StackTrace;
+            string message = errorData.Message + System.Environment.NewLine + errorData.StackTrace;
             Log.Write(
                 errorData.TypeName,
                 message,

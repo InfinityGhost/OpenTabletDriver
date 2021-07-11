@@ -89,7 +89,7 @@ namespace OpenTabletDriver.UX.Windows.Plugins
             catch (HttpRequestException httpEx)
             {
                 MessageBox.Show(
-                    "An error occurred when retrieving metadata. Only local plugins will be shown." + Environment.NewLine +
+                    "An error occurred when retrieving metadata. Only local plugins will be shown." + System.Environment.NewLine +
                     $"(Status code {httpEx.StatusCode})",
                     MessageBoxType.Warning
                 );

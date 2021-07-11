@@ -101,7 +101,7 @@ namespace OpenTabletDriver.Desktop
 
         private string GetDefaultConfigurationDirectory() => GetDirectoryIfExists(
             Path.Join(ProgramDirectory, "Configurations"),
-            Path.Join(Environment.CurrentDirectory, "Configurations")
+            Path.Join(System.Environment.CurrentDirectory, "Configurations")
         );
 
         private string GetDefaultSettingsFile() => Path.Join(AppDataDirectory, "settings.json");
@@ -113,9 +113,9 @@ namespace OpenTabletDriver.Desktop
         private static string InjectVariablesIntoPath(string str)
         {
             StringBuilder sb = new StringBuilder(str);
-            sb.Replace("~", Environment.GetEnvironmentVariable("HOME"));
+            sb.Replace("~", System.Environment.GetEnvironmentVariable("HOME"));
 
-            foreach (DictionaryEntry envVar in Environment.GetEnvironmentVariables())
+            foreach (DictionaryEntry envVar in System.Environment.GetEnvironmentVariables())
             {
                 string key = envVar.Key as string;
                 string value = envVar.Value as string;
