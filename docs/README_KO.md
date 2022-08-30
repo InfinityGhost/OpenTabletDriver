@@ -9,7 +9,7 @@ OpenTabletDriver는 관리자 권한 없이 여러 플랫폼에서 작동하는 
 <div align="middle">
   <img src="/.github/ASSETS/UX-GNOME.png" width="410" align="middle"/>
   <img src="https://i.imgur.com/jBW8NpU.png" width="410" align="middle"/>
-  <img src="https://i.imgur.com/ZLCy6wz.png" width="410" align="middle"/>
+  <img src="/.github/ASSETS/UX-MacOS.png" width="410" align="middle"/>
 </div>
 
 # 지원하는 타블렛
