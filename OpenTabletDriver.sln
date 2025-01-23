@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTabletDriver.UI.Tests",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTabletDriver.Daemon.Library", "OpenTabletDriver.Daemon.Library\OpenTabletDriver.Daemon.Library.csproj", "{5393EC0A-2AFF-4C06-A250-370A10A30088}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTabletDriver.Daemon.Contracts", "OpenTabletDriver.Daemon.Contracts\OpenTabletDriver.Daemon.Contracts.csproj", "{22B4201E-0064-4F8F-94EF-E058A5E07064}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -252,5 +254,17 @@ Global
 		{5393EC0A-2AFF-4C06-A250-370A10A30088}.Release|x64.Build.0 = Release|Any CPU
 		{5393EC0A-2AFF-4C06-A250-370A10A30088}.Release|x86.ActiveCfg = Release|Any CPU
 		{5393EC0A-2AFF-4C06-A250-370A10A30088}.Release|x86.Build.0 = Release|Any CPU
+		{22B4201E-0064-4F8F-94EF-E058A5E07064}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22B4201E-0064-4F8F-94EF-E058A5E07064}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22B4201E-0064-4F8F-94EF-E058A5E07064}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{22B4201E-0064-4F8F-94EF-E058A5E07064}.Debug|x64.Build.0 = Debug|Any CPU
+		{22B4201E-0064-4F8F-94EF-E058A5E07064}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{22B4201E-0064-4F8F-94EF-E058A5E07064}.Debug|x86.Build.0 = Debug|Any CPU
+		{22B4201E-0064-4F8F-94EF-E058A5E07064}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22B4201E-0064-4F8F-94EF-E058A5E07064}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22B4201E-0064-4F8F-94EF-E058A5E07064}.Release|x64.ActiveCfg = Release|Any CPU
+		{22B4201E-0064-4F8F-94EF-E058A5E07064}.Release|x64.Build.0 = Release|Any CPU
+		{22B4201E-0064-4F8F-94EF-E058A5E07064}.Release|x86.ActiveCfg = Release|Any CPU
+		{22B4201E-0064-4F8F-94EF-E058A5E07064}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

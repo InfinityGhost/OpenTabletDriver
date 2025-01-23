@@ -10,16 +10,16 @@ namespace OpenTabletDriver.Daemon.Library.Interop.Input.Keyboard
 
     public class WindowsVirtualKeyboard : IVirtualKeyboard
     {
-        private readonly IKeysProvider _keysProvider;
+        private readonly IKeyMapper _keysProvider;
 
-        public WindowsVirtualKeyboard(IKeysProvider keysProvider)
+        public WindowsVirtualKeyboard(IKeyMapper keysProvider)
         {
             _keysProvider = keysProvider;
         }
 
-        private void KeyEvent(string key, bool isPress)
+        private void KeyEvent(BindableKey key, bool isPress)
         {
-            var vk = (VirtualKey)_keysProvider.EtoToNative[key];
+            var vk = (VirtualKey)_keysProvider[key];
             var input = new INPUT
             {
                 type = INPUT_TYPE.KEYBD_INPUT,
@@ -40,28 +40,28 @@ namespace OpenTabletDriver.Daemon.Library.Interop.Input.Keyboard
             SendInput((uint)inputs.Length, inputs, INPUT.Size);
         }
 
-        public void Press(string key)
+        public void Press(BindableKey key)
         {
             KeyEvent(key, true);
         }
 
-        public void Release(string key)
+        public void Release(BindableKey key)
         {
             KeyEvent(key, false);
         }
 
-        public void Press(IEnumerable<string> keys)
+        public void Press(IEnumerable<BindableKey> keys)
         {
             foreach (var key in keys)
                 KeyEvent(key, true);
         }
 
-        public void Release(IEnumerable<string> keys)
+        public void Release(IEnumerable<BindableKey> keys)
         {
             foreach (var key in keys)
                 KeyEvent(key, false);
         }
 
-        public IEnumerable<string> SupportedKeys => _keysProvider.EtoToNative.Keys;
+        public IEnumerable<BindableKey> SupportedKeys => _keysProvider.GetBindableKeys();
     }
 }

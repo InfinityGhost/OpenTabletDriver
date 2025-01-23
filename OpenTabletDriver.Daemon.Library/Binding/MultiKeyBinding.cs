@@ -11,17 +11,19 @@ namespace OpenTabletDriver.Daemon.Library.Binding
     public class MultiKeyBinding : IStateBinding
     {
         private readonly IVirtualKeyboard _keyboard;
+        private readonly IEnumerable<BindableKey> _usableKeys;
 
-        public MultiKeyBinding(IVirtualKeyboard keyboard, ISettingsProvider settingsProvider)
+        public MultiKeyBinding(IVirtualKeyboard keyboard, ISettingsProvider settingsProvider, IKeyMapper keyMapper)
         {
             _keyboard = keyboard;
+            _usableKeys = keyMapper.GetBindableKeys();
 
             settingsProvider.Inject(this);
         }
 
         private const string PLUGIN_NAME = "Multi-Key Binding";
 
-        private IList<string> _keys = Array.Empty<string>();
+        private IList<BindableKey> _keys = Array.Empty<BindableKey>();
         private string _keysString = string.Empty;
 
         [Setting("Keys")]
@@ -47,10 +49,19 @@ namespace OpenTabletDriver.Daemon.Library.Binding
                 _keyboard.Release(_keys);
         }
 
-        private IList<string> ParseKeys(string str)
+        private List<BindableKey> ParseKeys(string str)
         {
             var newKeys = str.Split('+', StringSplitOptions.TrimEntries);
-            return newKeys.All(k => _keyboard.SupportedKeys.Contains(k)) ? newKeys :
+            var newKeysAsBindable = new List<BindableKey>();
+
+            // parse string representation into BindableKey enum
+            foreach (var key in newKeys)
+            {
+                if (Enum.TryParse(key, true, out BindableKey parsedKey))
+                    newKeysAsBindable.Add(parsedKey);
+            }
+
+            return newKeysAsBindable.All(k => _usableKeys.Contains(k)) ? newKeysAsBindable :
                 throw new NotSupportedException($"The keybinding combination ({str}) is not supported.");
         }
 

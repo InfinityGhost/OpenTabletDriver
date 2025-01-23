@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using OpenTabletDriver.Daemon.Interop.Input.Keyboard;
 using OpenTabletDriver.Daemon.Library.Diagnostics;
 using OpenTabletDriver.Daemon.Library.Interop.Display;
 using OpenTabletDriver.Daemon.Library.Interop.Environment;
@@ -27,7 +28,7 @@ namespace OpenTabletDriver.Daemon.Library.Interop
                 Transient<IAbsolutePointer, WindowsAbsolutePointer>(),
                 Transient<IRelativePointer, WindowsRelativePointer>(),
                 Transient<IVirtualKeyboard, WindowsVirtualKeyboard>(),
-                Singleton<IKeysProvider, WindowsKeysProvider>(),
+                Singleton<IKeyMapper, WindowsKeysProvider>(),
                 Transient<IVirtualScreen, WindowsDisplay>(),
                 Transient<IUpdater, WindowsUpdater>()
             });

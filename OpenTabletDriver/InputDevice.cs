@@ -30,6 +30,8 @@ namespace OpenTabletDriver
             hookEndpoint(Digitizer);
             hookEndpoint(Auxiliary);
 
+            Initialize(true);
+
             void hookEndpoint(InputDeviceEndpoint? endpoint)
             {
                 if (endpoint is null)

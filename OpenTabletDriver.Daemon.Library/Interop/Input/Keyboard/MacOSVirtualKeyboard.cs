@@ -11,45 +11,43 @@ namespace OpenTabletDriver.Daemon.Library.Interop.Input.Keyboard
 
     public class MacOSVirtualKeyboard : IVirtualKeyboard
     {
-        private readonly IKeysProvider _keysProvider;
+        private readonly IKeyMapper _keysProvider;
 
-        public MacOSVirtualKeyboard(IKeysProvider keysProvider)
+        public MacOSVirtualKeyboard(IKeyMapper keysProvider)
         {
             _keysProvider = keysProvider;
         }
 
-        private void KeyEvent(string key, bool isPress)
+        private void KeyEvent(BindableKey key, bool isPress)
         {
-            if (_keysProvider.EtoToNative.TryGetValue(key, out var code))
-            {
-                var keyEvent = CGEventCreateKeyboardEvent(IntPtr.Zero, (CGKeyCode)code, isPress);
-                CGEventPost(CGEventTapLocation.kCGHIDEventTap, keyEvent);
-                CFRelease(keyEvent);
-            }
+            var code = _keysProvider[key];
+            var keyEvent = CGEventCreateKeyboardEvent(IntPtr.Zero, (CGKeyCode)code, isPress);
+            CGEventPost(CGEventTapLocation.kCGHIDEventTap, keyEvent);
+            CFRelease(keyEvent);
         }
 
-        public void Press(string key)
+        public void Press(BindableKey key)
         {
             KeyEvent(key, true);
         }
 
-        public void Release(string key)
+        public void Release(BindableKey key)
         {
             KeyEvent(key, false);
         }
 
-        public void Press(IEnumerable<string> keys)
+        public void Press(IEnumerable<BindableKey> keys)
         {
             foreach (var key in keys)
                 KeyEvent(key, true);
         }
 
-        public void Release(IEnumerable<string> keys)
+        public void Release(IEnumerable<BindableKey> keys)
         {
             foreach (var key in keys)
                 KeyEvent(key, false);
         }
 
-        public IEnumerable<string> SupportedKeys => _keysProvider.EtoToNative.Keys;
+        public IEnumerable<BindableKey> SupportedKeys => _keysProvider.GetBindableKeys();
     }
 }

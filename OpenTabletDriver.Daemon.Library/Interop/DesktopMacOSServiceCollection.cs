@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using OpenTabletDriver.Daemon.Interop.Input.Keyboard;
 using OpenTabletDriver.Daemon.Library.Interop.Display;
 using OpenTabletDriver.Daemon.Library.Interop.Environment;
 using OpenTabletDriver.Daemon.Library.Interop.Input.Absolute;
@@ -24,7 +25,7 @@ namespace OpenTabletDriver.Daemon.Library.Interop
                 Transient<IAbsolutePointer, MacOSAbsolutePointer>(),
                 Transient<IRelativePointer, MacOSRelativePointer>(),
                 Transient<IVirtualKeyboard, MacOSVirtualKeyboard>(),
-                Transient<IKeysProvider, MacOSKeysProvider>(),
+                Transient<IKeyMapper, MacOSKeysProvider>(),
                 Transient<IVirtualScreen, MacOSDisplay>(),
                 Transient<IEnvironmentHandler, MacOSEnvironmentHandler>(),
                 Transient<IUpdater, MacOSUpdater>()

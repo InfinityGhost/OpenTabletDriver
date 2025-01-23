@@ -24,24 +24,24 @@ namespace OpenTabletDriver.Daemon.Library.Binding
         }
 
         [Setting("Key"), MemberValidated(nameof(GetValidKeys))]
-        public string Key { set; get; } = string.Empty;
+        public BindableKey? Key { set; get; }
 
         public void Press(IDeviceReport report)
         {
-            if (!string.IsNullOrWhiteSpace(Key))
-                _keyboard.Press(Key);
+            if (Key.HasValue)
+                _keyboard.Press(Key.Value);
         }
 
         public void Release(IDeviceReport report)
         {
-            if (!string.IsNullOrWhiteSpace(Key))
-                _keyboard.Release(Key);
+            if (Key.HasValue)
+                _keyboard.Release(Key.Value);
         }
 
-        public static IEnumerable<string> GetValidKeys(IServiceProvider serviceProvider)
+        public static IEnumerable<BindableKey> GetValidKeys(IServiceProvider serviceProvider)
         {
-            var keysProvider = serviceProvider.GetRequiredService<IKeysProvider>();
-            return keysProvider.EtoToNative.Keys;
+            var keysProvider = serviceProvider.GetRequiredService<IKeyMapper>();
+            return keysProvider.GetBindableKeys();
         }
 
         public override string ToString() => $"{PLUGIN_NAME}: {Key}";
