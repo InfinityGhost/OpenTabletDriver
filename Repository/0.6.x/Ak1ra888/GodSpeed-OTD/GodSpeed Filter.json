@@ -1,0 +1,13 @@
+{
+    "Name": "GodSpeed Filter",
+    "Owner": "Ak1ra",
+    "Description": "Advanced smoothing filter with EMA, Kalman, Ring Buffer and Hybrid modes. 1000Hz interpolation, adaptive speed detection, prediction compensation. Optimized for osu!",
+    "PluginVersion": "0.5.4.0",
+    "SupportedDriverVersion": "0.6.0.0",
+    "RepositoryUrl": "https://github.com/Ak1ra888/GodSpeed-OTD",
+    "DownloadUrl": "https://github.com/Ak1ra888/GodSpeed-OTD/releases/download/v0.5.4.0/GodSpeedOTD.zip",
+    "CompressionFormat": "zip",
+    "SHA256": "FEDA6E8DCEFDD100A6D8126FD08296D2340A6F78CBC4A9BEE01FB38F4BD6E752",
+    "WikiUrl": "https://github.com/Ak1ra888/GodSpeed-OTD/blob/main/README.md",
+    "LicenseIdentifier": "MIT"
+}
